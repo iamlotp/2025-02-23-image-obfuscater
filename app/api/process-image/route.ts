@@ -5,7 +5,7 @@ import { join } from 'path'
 import { prisma } from '@/lib/prisma'
 import { v4 as uuidv4 } from 'uuid'
 
-export const getUsername = async (fid: string | number) => {
+const getUsername = async (fid: string | number) => {
   interface UserDataBody {
       type: string;
       value: string;

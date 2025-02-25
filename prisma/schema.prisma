@@ -1,0 +1,48 @@
+// prisma/schema.prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model ImageEdit {
+  id              String    @id @default(uuid())
+  ogImage         String
+  editedImage     String
+  note            String?
+  creatorFid      String
+  creatorUsername String?
+  // There are two methods for the images shared by the creators
+  // 1. Paywalled content: Users who want to see the original non-obfuscated image should pay in $degen tips in the replies of the cast that contains the frame
+  // "unlockFee" is set to determine how much the minimum tips to unlock the content should be
+  // 2. Contest: Users guess the image in the replies of the cast with the frame
+  // when a user is determined as WINNER by the original poster, "isSolved" will be true and everyone can view the original image
+  isPaywalled     Boolean   @default(false)
+  unlockFee       Float     @default(0)
+  isContest       Boolean   @default(false)
+  isSolved        Boolean   @default(false)
+  prizeAmount     Float     @default(0)
+  winnerFid       String?   @default("")
+  viewedBy        String    @default("")
+  createdAt       DateTime  @default(now())
+  Viewers         Viewers[]
+}
+
+model Viewers {
+  id          Int       @id @default(autoincrement())
+  viewerFid   String
+  hasPaid     Boolean   @default(false)
+  imageEdit   ImageEdit @relation(fields: [imageEditId], references: [id])
+  imageEditId String
+  createdAt   DateTime  @default(now())
+}
+
+model tokens {
+  id        Int      @id @default(autoincrement())
+  token     String
+  usedByFid String
+  createdAt DateTime @default(now())
+}

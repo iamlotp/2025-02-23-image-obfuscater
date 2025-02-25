@@ -77,8 +77,8 @@ export async function POST(request: Request) {
   // Save to database
   const record = await prisma.imageEdit.create({
     data: {
-      ogImage: `/uploads/${ogFilename}`,
-      editedImage: `/uploads/${editedFilename}`,
+      ogImage: `/api/images/${ogFilename}`,
+      editedImage: `/api/images/${editedFilename}`,
       note,
       creatorFid: fid,
       creatorUsername: username,

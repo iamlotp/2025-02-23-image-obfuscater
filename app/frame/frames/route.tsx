@@ -32,6 +32,8 @@ const handleRequest = frames(async (ctx) => {
         };
     }
 
+
+
     if (!imageId) {
         return {
             image: (
@@ -64,6 +66,39 @@ const handleRequest = frames(async (ctx) => {
                 </span>
             )
         };
+    }
+    if (ctx.searchParams.settings === "true") {
+        const requester = ctx.message?.requesterFid!
+        if (requester.toString() !== image.creatorFid) {
+            error("You are not the creator of this image!");
+        }
+        return {
+            image: (
+                <span>
+                    Click on the button bellow to finish the contest.
+                </span>
+            ),
+            buttons: [
+                <Button action="post" target={{ query: { finish: "true", id: imageId } }}>
+                    Finish Contest
+                </Button>,
+                <Button action="post" target={{ query: { back: "true", id: imageId } }}>
+                    Back
+                </Button>
+            ],
+            imageOptions: {
+                aspectRatio: "1:1",
+                width: 1080,
+            }
+        };
+    }
+    if (ctx.searchParams.finish === "true") {
+        const requester = ctx.message?.requesterFid!
+        await prisma.imageEdit.update({
+            where: { id: imageId },
+            data: { isSolved: true },
+        });
+        error("Contest finished!");
     }
 
     if (ctx.searchParams.view === "true") {
@@ -241,6 +276,9 @@ const handleRequest = frames(async (ctx) => {
             <Button action="post" target={{ query: { create: "true", id: imageId } }}>
                 Create
             </Button>,
+            (image.isContest && <Button action="post" target={{ query: { settings: "true", id: imageId } }}>
+                ⚙️ Settings
+            </Button>)
         ],
         imageOptions: {
             aspectRatio: "1:1",

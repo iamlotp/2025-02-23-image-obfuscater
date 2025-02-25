@@ -7,10 +7,10 @@ import { existsSync } from 'fs'
 // Use a simpler route with just a filename param instead of catch-all
 export async function GET(
   request: NextRequest,
-  { params }: { params: { filename: string } }
+  { params }: { params: Promise<{ filename: string }> }
 ) {
   try {
-    const { filename } = params
+    const { filename } = await params
     const filePath = join(process.cwd(), 'public', 'uploads', filename)
     
     if (!existsSync(filePath)) {

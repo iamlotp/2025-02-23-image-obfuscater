@@ -1,16 +1,16 @@
 // app/api/images/[...path]/route.ts
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { readFile } from 'fs/promises'
 import { join } from 'path'
 import { existsSync } from 'fs'
 
+// Correct type definition for the route handler with catch-all params
 export async function GET(
-  request: Request,
+  request: NextRequest,
   { params }: { params: { path: string[] } }
 ) {
-  const path = params.path.join('/')
-  
   try {
+    const path = params.path.join('/')
     const filePath = join(process.cwd(), 'public', 'uploads', path)
     
     if (!existsSync(filePath)) {

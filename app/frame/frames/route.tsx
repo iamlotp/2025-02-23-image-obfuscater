@@ -10,6 +10,47 @@ import hasPaid from "./apiCalls";
 const handleRequest = frames(async (ctx) => {
     const imageId = ctx.searchParams.id;
 
+    if (ctx.searchParams.create === "true") {
+        const requester = ctx.message?.requesterFid!
+
+        const token = await getToken(requester.toString())
+        return {
+            image: (
+                <span>
+                    Click on the button below to create a new blurry image.
+                </span>
+            ),
+            buttons: [
+                <Button action="link" target={APP_URL + '/edit-page?fid=' + requester + '&token=' + token}>
+                    Create
+                </Button>,
+            ],
+            imageOptions: {
+                aspectRatio: "1:1",
+                width: 1080,
+            }
+        };
+    }
+
+    if (!imageId) {
+        return {
+            image: (
+                <span>
+                    Image Not Found!
+                </span>
+            ),
+            buttons: [
+                <Button action="post" target={{ query: { create: "true", id: imageId } }}>
+                    Create
+                </Button>,
+            ],
+            imageOptions: {
+                aspectRatio: "1:1",
+                width: 1080,
+            }
+        };
+    }
+
     const image = (await prisma.imageEdit.findUnique({
         where: { id: imageId },
     }));
@@ -113,27 +154,6 @@ const handleRequest = frames(async (ctx) => {
         };
     }
 
-    if (ctx.searchParams.create === "true") {
-        const requester = ctx.message?.requesterFid!
-
-        const token = await getToken(requester.toString())
-        return {
-            image: (
-                <span>
-                    Click on the button below to create a new blurry image.
-                </span>
-            ),
-            buttons: [
-                <Button action="link" target={APP_URL + '/edit-page?fid=' + requester + '&token=' + token}>
-                    Create
-                </Button>,
-            ],
-            imageOptions: {
-                aspectRatio: "1:1",
-                width: 1080,
-            }
-        };
-    }
     return {
         image: (
             <div

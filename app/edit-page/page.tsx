@@ -8,8 +8,8 @@ export default async function EditPage({
 }: {
   searchParams: { [key: string]: string | string[] | undefined }
 }) {
-  // Get query parameters
-  const params = await Promise.resolve(searchParams);
+  // Get query parameters.  No need for Promise.resolve!
+  const params = searchParams;
 
   const fid = typeof params.fid === 'string' ? params.fid : '';
   const token = typeof params.token === 'string' ? params.token : '';

@@ -11,7 +11,7 @@ export default async function ShareFrame({
 }: {
     searchParams: { [key: string]: string }
 }) {
-    const params = await Promise.resolve(searchParams);
+    const params = searchParams
     const recordId = params.id
 
 

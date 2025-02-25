@@ -6,10 +6,10 @@ import { TokenAuthForm } from '@/components/TokenAuthForm'
 export default async function EditPage({
   searchParams,
 }: {
-  searchParams: { [key: string]: string | string[] | undefined }
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
-  // Get query parameters.  No need for Promise.resolve!
-  const params = searchParams;
+  // Get query parameters
+  const params = await searchParams;
 
   const fid = typeof params.fid === 'string' ? params.fid : '';
   const token = typeof params.token === 'string' ? params.token : '';

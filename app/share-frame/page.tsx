@@ -9,10 +9,10 @@ import { getCurrentToken, getCurrentUser, validateToken } from '@/lib/auth'
 export default async function ShareFrame({
     searchParams,
 }: {
-    searchParams: { [key: string]: string }
+    searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
-    const params = searchParams
-    const recordId = params.id
+    const params = await searchParams
+    const recordId = params.id as string
 
 
     if (!recordId) {

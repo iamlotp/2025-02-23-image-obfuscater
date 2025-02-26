@@ -108,7 +108,7 @@ const handleRequest = frames(async (ctx) => {
         if (image.isPaywalled) {
             const requester = ctx.message?.requesterFid!
             const frameCast = ctx.message?.castId;
-            if (!hasPaid(requester, image.unlockFee, frameCast!.hash)) {
+            if (requester !== frameCast!.fid && !(await hasPaid(requester, image.unlockFee, frameCast!.hash))) {
                 return error("Tip the creator to view!");
             }
         }

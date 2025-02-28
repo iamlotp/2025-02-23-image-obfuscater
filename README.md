@@ -35,8 +35,8 @@ This project is a Next.js application that allows users to create and share "obf
 
 1.  **Clone the repository:**
     ```bash
-    git clone <repository-url>
-    cd <repository-directory>
+    git clone https://github.com/iamlotp/2025-02-23-image-obfuscater.git
+    cd 2025-02-23-image-obfuscater
     ```
 2.  **Install dependencies:**
     ```bash

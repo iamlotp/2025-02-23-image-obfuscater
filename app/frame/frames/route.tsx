@@ -116,9 +116,16 @@ const handleRequest = frames(async (ctx) => {
                     hash: frameCast!.hash as `0x${string}`
                 }
             );
+
+            if (isValidPayment === "Pending") {
+                return error("Validating your tip. Takes less than 2 minutes.");
+            }
+            if (isValidPayment === "Invalid") {
+                return error("The tip was invalid!");
+            }
             
             if (requester !== frameCast!.fid && !isValidPayment) {
-                return error("Tip the creator to view!");
+                return error("Tip the creator the specified amount to view!");
             }
         }
         return {

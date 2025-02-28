@@ -34,7 +34,7 @@ model ImageEdit {
 model Viewers {
   id          Int       @id @default(autoincrement())
   viewerFid   String
-  hasPaid     Boolean   @default(false)
+  status      String    @default("Undefined") // "Undefined", "Pending", "Valid", "Invalid", "NotFound"
   imageEdit   ImageEdit @relation(fields: [imageEditId], references: [id])
   imageEditId String
   createdAt   DateTime  @default(now())

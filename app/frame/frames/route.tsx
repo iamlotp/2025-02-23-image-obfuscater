@@ -5,7 +5,7 @@ import { frames } from "./frames";
 import { prisma } from "@/lib/prisma";
 import { APP_LOCAL, APP_URL } from "../constants";
 import { getToken } from "@/lib/auth";
-import hasPaid from "./apiCalls";
+import { validatePayment } from "./apiCalls";
 
 const handleRequest = frames(async (ctx) => {
     const imageId = ctx.searchParams.id;
@@ -108,7 +108,16 @@ const handleRequest = frames(async (ctx) => {
         if (image.isPaywalled) {
             const requester = ctx.message?.requesterFid!
             const frameCast = ctx.message?.castId;
-            if (requester !== frameCast!.fid && !(await hasPaid(requester, image.unlockFee, frameCast!.hash))) {
+            const isValidPayment = await validatePayment(
+                requester,
+                image.unlockFee,
+                {
+                    fid: frameCast!.fid,
+                    hash: frameCast!.hash as `0x${string}`
+                }
+            );
+            
+            if (requester !== frameCast!.fid && !isValidPayment) {
                 return error("Tip the creator to view!");
             }
         }

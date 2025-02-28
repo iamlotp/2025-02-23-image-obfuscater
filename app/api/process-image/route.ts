@@ -27,13 +27,11 @@ const getUsername = async (fid: string | number) => {
       signatureScheme: string;
       signer: string;
   }
-  const server = "https://hubs.airstack.xyz";
+  const server = "https://hub.pinata.cloud";
   try {
       const response = await fetch(`${server}/v1/userDataByFid?fid=${fid}&user_data_type=6`, {
           headers: {
               "Content-Type": "application/json",
-              // Provide API key here
-              "x-airstack-hubs": process.env.AIRSTACK_API_KEY as string,
           },
       });
 

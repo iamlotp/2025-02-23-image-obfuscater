@@ -35,8 +35,8 @@ This project is a Next.js application that allows users to create and share "obf
 
 1.  **Clone the repository:**
     ```bash
-    git clone <repository-url>
-    cd <repository-directory>
+    git clone https://github.com/iamlotp/2025-02-23-image-obfuscater.git
+    cd 2025-02-23-image-obfuscater
     ```
 2.  **Install dependencies:**
     ```bash
@@ -48,6 +48,8 @@ This project is a Next.js application that allows users to create and share "obf
     Create a `.env.local` file in the root directory of the project. You'll need to add the URL of your database there. You may use prisma studio to configure your database.
     ```
     DATABASE_URL="your_database_url"
+    NEXT_PUBLIC_APP_URL="https://blurry.is-frame.art"
+    NEXT_LOCAL_URL="http://localhost:7007"
     ```
 4.  **Run Prisma migrations:**
     ```bash

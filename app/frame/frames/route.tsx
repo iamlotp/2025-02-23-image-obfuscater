@@ -110,152 +110,155 @@ const handleRequest = frames(async (ctx) => {
             const requester = ctx.message?.requesterFid!
             const frameCast = ctx.message?.castId;
 
-            const viewer = await prisma.viewers.findFirst({
-                where: {
-                    viewerFid: requester.toString(),
-                    imageEditId: imageId,
-                },
-            });
-
-            if (!viewer) {
-                await prisma.viewers.create({
-                    data: {
+            if (requester.toString() !== image.creatorFid) {
+                const viewer = await prisma.viewers.findFirst({
+                    where: {
                         viewerFid: requester.toString(),
                         imageEditId: imageId,
-                        status: "Pending",
                     },
                 });
-                try {
-                    // Create a timeout promise that rejects after 2 seconds
-                    const timeoutPromise = new Promise((_, reject) => {
-                        setTimeout(() => {
-                            reject(new Error('Fetch timeout after 2 seconds'));
-                        }, 2000);
+
+                if (!viewer) {
+                    await prisma.viewers.create({
+                        data: {
+                            viewerFid: requester.toString(),
+                            imageEditId: imageId,
+                            status: "Pending",
+                        },
                     });
+                    try {
+                        // Create a timeout promise that rejects after 2 seconds
+                        const timeoutPromise = new Promise((_, reject) => {
+                            setTimeout(() => {
+                                reject(new Error('Fetch timeout after 2 seconds'));
+                            }, 2000);
+                        });
 
-                    // Race between the fetch and timeout
-                    const response = await Promise.race([
-                        fetch(APP_LOCAL + `/api/tip-validator`, {
-                            method: "POST",
-                            body: JSON.stringify({
-                                imageId, requester, minFee: image.unlockFee, parentCast: frameCast,
+                        // Race between the fetch and timeout
+                        const response = await Promise.race([
+                            fetch(APP_LOCAL + `/api/tip-validator`, {
+                                method: "POST",
+                                body: JSON.stringify({
+                                    imageId, requester, minFee: image.unlockFee, parentCast: frameCast,
+                                }),
+                            }).then(res => {
+                                // Check if response status is not 200
+                                if (!res.ok) {
+                                    throw new Error(`HTTP error! Status: ${res.status}`);
+                                }
+                                return res;
                             }),
-                        }).then(res => {
-                            // Check if response status is not 200
-                            if (!res.ok) {
-                                throw new Error(`HTTP error! Status: ${res.status}`);
-                            }
-                            return res;
-                        }),
-                        timeoutPromise
-                    ]);
+                            timeoutPromise
+                        ]);
 
-                    // If fetch completes before timeout and response is ok.
-                    await prisma.viewers.updateMany({
-                        where: { imageEditId: imageId, viewerFid: requester.toString() },
-                        data: { status: "Valid" }
-                    })
+                        // If fetch completes before timeout and response is ok.
+                        await prisma.viewers.updateMany({
+                            where: { imageEditId: imageId, viewerFid: requester.toString() },
+                            data: { status: "Valid" }
+                        })
 
-                    return {
-                        image: (
-                            <div
-                                style={{
-                                    width: "100%",
-                                    height: "100%",
-                                    padding: "50px",
-                                    display: "flex",
-                                    flexDirection: "column",
-                                    position: "relative",
-                                    backgroundColor: "black",
-                                }}
-                            >
+                        return {
+                            image: (
                                 <div
                                     style={{
                                         width: "100%",
                                         height: "100%",
-                                        backgroundColor: "white",
+                                        padding: "50px",
                                         display: "flex",
                                         flexDirection: "column",
+                                        position: "relative",
+                                        backgroundColor: "black",
                                     }}
                                 >
                                     <div
                                         style={{
                                             width: "100%",
                                             height: "100%",
-                                            position: "relative",
-                                            overflow: "hidden",
+                                            backgroundColor: "white",
                                             display: "flex",
+                                            flexDirection: "column",
                                         }}
                                     >
-                                        <img
-                                            src={`${APP_LOCAL + image.ogImage}`}
+                                        <div
                                             style={{
                                                 width: "100%",
                                                 height: "100%",
-                                                objectFit: "cover",
+                                                position: "relative",
+                                                overflow: "hidden",
+                                                display: "flex",
                                             }}
-                                        />
-
-                                        {/* Text Overlays */}
-                                        {
-                                            image.note && <div
+                                        >
+                                            <img
+                                                src={`${APP_LOCAL + image.ogImage}`}
                                                 style={{
-                                                    position: "absolute",
-                                                    maxWidth: "800px",
-                                                    top: "20px",
-                                                    left: "20px",
-                                                    padding: "8px 12px",
-                                                    backgroundColor: "black",
-                                                    color: "white",
-                                                    fontSize: "32px",
-                                                    fontWeight: 500,
-                                                    borderRadius: "4px",
-                                                    textWrap: "wrap",
-                                                    wordBreak: "break-word",
+                                                    width: "100%",
+                                                    height: "100%",
+                                                    objectFit: "cover",
                                                 }}
-                                            >
-                                                {image.note}
-                                            </div>
-                                        }
+                                            />
+
+                                            {/* Text Overlays */}
+                                            {
+                                                image.note && <div
+                                                    style={{
+                                                        position: "absolute",
+                                                        maxWidth: "800px",
+                                                        top: "20px",
+                                                        left: "20px",
+                                                        padding: "8px 12px",
+                                                        backgroundColor: "black",
+                                                        color: "white",
+                                                        fontSize: "32px",
+                                                        fontWeight: 500,
+                                                        borderRadius: "4px",
+                                                        textWrap: "wrap",
+                                                        wordBreak: "break-word",
+                                                    }}
+                                                >
+                                                    {image.note}
+                                                </div>
+                                            }
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        ),
-                        buttons: [
-                            <Button action="post" target={{ query: { back: "true", id: imageId } }}>
-                                Back
-                            </Button>,
-                        ],
-                        imageOptions: {
-                            aspectRatio: "1:1",
-                            width: 1080,
+                            ),
+                            buttons: [
+                                <Button action="post" target={{ query: { back: "true", id: imageId } }}>
+                                    Back
+                                </Button>,
+                            ],
+                            imageOptions: {
+                                aspectRatio: "1:1",
+                                width: 1080,
+                            }
+                        };
+                    } catch (e) {
+                        // Timeout occurred or fetch failed
+                        return error(`Tip ${image.unlockFee} $DEGEN. Wait a few moments if tipped!`);
+                    }
+                }
+
+                if (viewer.status !== "Valid") {
+                    if (viewer.status === "Pending") {
+                        return error("Still validating... Wait more.");
+                    }
+                    // deleting the record so the user can try again fresh
+                    await prisma.viewers.deleteMany({
+                        where: {
+                            viewerFid: requester.toString(),
+                            imageEditId: imageId,
                         }
-                    };
-                } catch (e) {
-                    // Timeout occurred or fetch failed
-                    return error(`Tip ${image.unlockFee} $DEGEN. Wait a few moments if tipped!`);
+                    });
+                    if (viewer.status === "Invalid") {
+                        return error("Invalid! Tipped more than allowance.");
+                    }
+                    if (viewer.status === "NotFound") {
+                        return error(`Tip ${image.unlockFee} $DEGEN. Wait a few moments if tipped!`);
+                    }
+                    return error("Something went wrong. Try again.");
                 }
             }
 
-            if (viewer.status !== "Valid") {
-                if (viewer.status === "Pending") {
-                    return error("Still validating... Wait more.");
-                }
-                // deleting the record so the user can try again fresh
-                await prisma.viewers.deleteMany({
-                    where: {
-                        viewerFid: requester.toString(),
-                        imageEditId: imageId,
-                    }
-                });
-                if (viewer.status === "Invalid") {
-                    return error("Invalid! Tipped more than allowance.");
-                }
-                if (viewer.status === "NotFound") {
-                    return error(`Tip ${image.unlockFee} $DEGEN. Wait a few moments if tipped!`);
-                }
-                return error("Something went wrong. Try again.");
-            }
         }
         return {
             image: (

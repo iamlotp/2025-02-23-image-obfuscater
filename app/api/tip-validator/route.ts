@@ -76,22 +76,30 @@ export async function POST(
             return NextResponse.json({ message: "Couldn't find a tip greater than reveal fee." }, { status: 404 });
         }
 
+        const startOfToday = getStartOfTodayUTC();
+        if (targetCastTimestamp < startOfToday) {
+            await prisma.viewers.updateMany({
+                where: { imageEditId: imageId, viewerFid: requester.toString() },
+                data: { status: 'NotFound' },
+            });
+            return NextResponse.json({ message: 'Tip is not for today!' }, { status: 400 });
+        }
+
         // 2. Fetch casts by the requester's FID
         const requesterCastsUrl = `https://hub.pinata.cloud/v1/castsByFid?fid=${requester}&pageSize=300&reverse=true`;
         const requesterCastsData = await fetchData(requesterCastsUrl);
 
         // Calculate degenTipsGiven
         let degenTipsGiven = 0;
-        const startOfToday = getStartOfTodayUTC();
 
         if (requesterCastsData.messages && Array.isArray(requesterCastsData.messages)) {
             for (const cast of requesterCastsData.messages) {
                 if (cast.data.timestamp > targetCastTimestamp) continue;
                 if (cast.data.timestamp < startOfToday) break;
-                
+
                 if (cast.data.castAddBody?.parentCastId && cast.data.castAddBody?.parentCastId?.hash !== null) {
                     const tipAmount = extractTipAmount(cast.data.castAddBody.text);
-                    if (tipAmount !== null) {                        
+                    if (tipAmount !== null) {
                         degenTipsGiven += tipAmount;
                     }
                 }

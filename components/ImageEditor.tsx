@@ -89,6 +89,7 @@ export function ImageEditor({ fid }: { fid: string }) {
         const imageEl = new Image()
         imageEl.src = image
 
+        // First canvas for cropping
         const canvas = document.createElement('canvas')
         const ctx = canvas.getContext('2d')
 
@@ -107,8 +108,33 @@ export function ImageEditor({ fid }: { fid: string }) {
             croppedArea.height
         )
 
-        const base64Image = canvas.toDataURL('image/jpeg')
-        setCroppedImage(base64Image)
+        // Check if dimensions exceed 1080x1080 and resize if needed
+        if (croppedArea.width > 1080 || croppedArea.height > 1080) {
+            const resizeCanvas = document.createElement('canvas')
+            const resizeCtx = resizeCanvas.getContext('2d')
+            
+            resizeCanvas.width = 1080
+            resizeCanvas.height = 1080
+            
+            resizeCtx?.drawImage(
+                canvas,
+                0,
+                0,
+                canvas.width,
+                canvas.height,
+                0,
+                0,
+                1080,
+                1080
+            )
+            
+            const base64Image = resizeCanvas.toDataURL('image/jpeg')
+            setCroppedImage(base64Image)
+        } else {
+            const base64Image = canvas.toDataURL('image/jpeg')
+            setCroppedImage(base64Image)
+        }
+        
         setShowCropModal(false)
     }
 

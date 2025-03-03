@@ -40,7 +40,7 @@ export function ImageEditor({ fid }: { fid: string }) {
     const [croppedImage, setCroppedImage] = useState<string | null>(null)
     const [showCropModal, setShowCropModal] = useState(false)
     const [processing, setProcessing] = useState(false)
-    const [frameType, setFrameType] = useState<'contest' | 'paywall' | 'none'>('contest')
+    const [frameType, setFrameType] = useState<'contest' | 'paywall' | 'none'>('paywall')
     const [prizeAmount, setPrizeAmount] = useState('')
     const [unlockFee, setUnlockFee] = useState('')
     const [showFrameTypeGuide, setShowFrameTypeGuide] = useState(false)
@@ -82,7 +82,7 @@ export function ImageEditor({ fid }: { fid: string }) {
     const onCropComplete = useCallback((_: Area, croppedAreaPixels: Area) => {
         setCroppedArea(croppedAreaPixels)
     }, [])
-
+    
     const getCroppedImg = async () => {
         if (!image || !croppedArea) return
 
